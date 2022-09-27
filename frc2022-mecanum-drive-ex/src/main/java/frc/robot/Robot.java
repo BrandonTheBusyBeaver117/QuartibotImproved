@@ -8,9 +8,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -25,6 +28,8 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 
 import frc.robot.MecanumDriveCTRE;
 import frc.robot.commands.*;
+
+import edu.wpi.first.wpilibj.SPI;
 
 /** This is a demo program showing how to use Mecanum control with the MecanumDrive class. */
 public class Robot extends TimedRobot {
@@ -46,13 +51,19 @@ public class Robot extends TimedRobot {
   private TalonSRX mRearRightTalon;
 
   private MecanumDriveCTRE mRobotDrive;
-  private Joystick mJoystickA;
+
+  private XboxController xboxController;
+
   private TalonSRXConfiguration mDriveTalonSRXConfigAll;
   /* Robot Commands */
   private final DriveTimed mSimpleAuto = new DriveTimed(3, 1, 0, 0, mRobotDrive);
   private final DriveTimed mAnotherAuto = new DriveTimed(10, 1, 0, 0, mRobotDrive);
   SendableChooser<DriveTimed> m_chooser = new SendableChooser<>();
   private DriveTimed m_auto_command;
+
+  private final ADXRS450_Gyro Gyro = new ADXRS450_Gyro(SPI.Port.kOnboardCS0); // Gyro connected over MXP
+
+
 
   @Override
   public void robotInit() {
@@ -92,7 +103,10 @@ public class Robot extends TimedRobot {
     // enable velocity control - max scale in ticks/100ms
     mRobotDrive.setControlMode(ControlMode.Velocity, 260);
 
-    mJoystickA = new Joystick(kJoystickAChannel);
+    xboxController = new XboxController(kJoystickAChannel);
+
+    Shuffleboard.getTab("Gyro").add(Gyro).withWidget("Gyro");
+
 
     // auto selections
     m_chooser.setDefaultOption("Simple Auto", mSimpleAuto);
@@ -139,10 +153,11 @@ public class Robot extends TimedRobot {
     // Use the joystick X axis for lateral movement, Y axis for forward
     // movement, and Z axis for rotation.
     mRobotDrive.driveCartesian(
-      -mJoystickA.getRawAxis(kJoystickALeftY),
-      mJoystickA.getRawAxis(kJoystickALeftX),
-      mJoystickA.getRawAxis(kJoystickARightX),
-      0.0);
+      xboxController.getLeftY(), 
+      xboxController.getLeftX(),
+      xboxController.getRightX(),
+      Gyro.getAngle());
+
   }
 
   //public Command getAutonomousCommand() {

@@ -16,10 +16,14 @@ import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.drive.RobotDriveBase;
 import edu.wpi.first.wpilibj.drive.Vector2d;
 
+import edu.wpi.first.wpilibj.SPI;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.IMotorController;
 
 import frc.robot.commands.*;
+
+import com.kauailabs.navx.frc.AHRS;
 
 /**
  * A derivative class of WPILib Mecanum drive for CAN Talon controllers.
@@ -66,6 +70,8 @@ import frc.robot.commands.*;
 @SuppressWarnings("removal")
 public class MecanumDriveCTRE extends RobotDriveBase implements Sendable, AutoCloseable {
   private static int instances;
+
+  private final AHRS navx = new AHRS(SPI.Port.kMXP, (byte) 200); // NavX connected over MXP
 
   private final IMotorController m_frontLeftMotor;
   private final IMotorController m_rearLeftMotor;
